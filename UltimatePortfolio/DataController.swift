@@ -10,6 +10,8 @@ import CoreData
 class DataController: ObservableObject{
     let container: NSPersistentCloudKitContainer
     
+    @Published var selectedFilter: Filter? = Filter.all
+    
     static var preview: DataController = {
         let dataController = DataController(inMemory: true)
         dataController.createSampleData()
@@ -53,7 +55,7 @@ class DataController: ObservableObject{
         try? viewContext.save()
     }
     
-    func save(){
+    func save() {
         if container.viewContext.hasChanges {
             try? container.viewContext.save()
         }
@@ -71,7 +73,7 @@ class DataController: ObservableObject{
         
         if let delete = try? container.viewContext.execute(batchDeleteRequest) as? NSBatchDeleteResult {
             
-            let changes = [NSDeletedObjectsKey: delete.result as? [NSManagedObject] ?? []]
+            let changes = [NSDeletedObjectsKey: delete.result as? [NSManagedObjectID] ?? []]
             NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [container.viewContext])
         }
         
@@ -84,5 +86,6 @@ class DataController: ObservableObject{
         let request2: NSFetchRequest<NSFetchRequestResult> = Issue.fetchRequest()
         delete(request2)
         
+        save()
     }
 }
